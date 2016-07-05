@@ -8,13 +8,13 @@ nx = 30;
 ny = 30;
 range = 1;
 N = nx * ny;
-I = 0.2;
-R = 0.385;
-D = 0.0004 * R;
-K = 10;
-F = 10;
-nt_max = 60;
-nt_interval = nt_max / 20;
+
+I = 0.2;        %感染率
+R = 0.385;      %治癒率
+D = 0.0004 * R; %死亡率
+F = 5;         %初期感染者数
+nt_max = 30;
+nt_interval = nt_max / 10;
 
 infP = zeros(nx, ny);
 infT = zeros(nx, ny);
@@ -22,8 +22,11 @@ infR = zeros(2 * range + 1, 2 * range + 1)
 imm = zeros(nx, ny);
 dead = zeros(nx, ny);
 
+infP_trans = zeros(nt_max + 1, 1);
+deadP_trans = zeros(nt_max + 1, 1);
+immP_trans = zeros(nt_max + 1, 1);
 
-
+infP_trans(1, 1) = F;   %初期感染者数記録
 
 for ii = 1 : F
     x = floor(nx * rand) + 1;
@@ -56,7 +59,7 @@ end
 j1m(1) = 0; j1p(ny) = 0;
 
 
-n_fig = 1;
+n_fig = 2;
 figure(n_fig); clf;
 
 for x = 1 : nx
@@ -71,12 +74,12 @@ for x = 1 : nx
     end
 end
 
-title('感染状況','fontsize',20);
+title('Infection status','fontsize',20);
 axis([0, nx + 1, 0, ny + 1]);
 axis('square');
-text(nx + 2, ny,'✳︎','Color','red','fontsize',20); text(nx + 4, ny,'・・感染者','fontsize',17);
-text(nx + 2, ny - 2,'◯','Color','green','fontsize',16); text(nx + 4, ny - 2,'・・非感染者','fontsize',17);
-text(nx + 2, ny - 4,'□','Color','blue','fontsize',16); text(nx + 4, ny - 4,'・・抗体所持','fontsize',17);
+text(nx + 2, ny,'✳︎','Color','red','fontsize',20); text(nx + 4, ny,':infection','fontsize',17);
+text(nx + 2, ny - 2,'◯','Color','green','fontsize',16); text(nx + 4, ny - 2,':healthy','fontsize',17);
+text(nx + 2, ny - 4,'□','Color','blue','fontsize',16); text(nx + 4, ny - 4,':recover','fontsize',17);
 eval(sprintf('print res/pand_%d.jpg', n_fig));
 n_fig = n_fig + 1;
 
@@ -140,19 +143,33 @@ for nt = 1 : nt_max
 
                 %回復,死亡関係
                 infT(ii, jj) = infT(ii, jj) + 1;
-                if rand < R / 2
+                decision = rand;
+
+                if decision > 1 - R / 2
                     infP(ii, jj) = 0;
                     imm(ii, jj) = 1;
-                end
-
-                if rand < D
-                    dead(ii, jj) = 1;
+                    immP_trans(nt + 1, 1) = immP_trans(nt + 1, 1) + 1;
+                else
+                    if decision < D
+                        dead(ii, jj) = 1;
+                    end
                 end
 
             end
 
+
+            if infP(ii, jj) == 1
+                infP_trans(nt + 1, 1) = infP_trans(nt + 1, 1) + 1;
+            end
+
+            if dead(ii, jj) == 1
+                deadP_trans(nt + 1, 1) = deadP_trans(nt + 1, 1) + 1;
+            end
+
         end
     end
+
+
 
     if mod(nt, nt_interval) == 0
 
@@ -177,11 +194,11 @@ for nt = 1 : nt_max
             end
         end
 
-        title('感染状況','fontsize',20);
+        title('Infection status','fontsize',20);
         text(nx + 2, ny - 10, [' t = ', num2str(nt)], 'fontsize', 20, 'fontname', 'times');
-        text(nx + 2, ny,'✳︎','Color','red','fontsize',20); text(nx + 4, ny,'・・感染者','fontsize',17);
-        text(nx + 2, ny - 2,'◯','Color','green','fontsize',16); text(nx + 4, ny - 2,'・・非感染者','fontsize',17);
-        text(nx + 2, ny - 4,'□','Color','blue','fontsize',16); text(nx + 4, ny - 4,'・・抗体所持','fontsize',17);
+        text(nx + 2, ny,'✳︎','Color','red','fontsize',20); text(nx + 4, ny,':infection','fontsize',17);
+        text(nx + 2, ny - 2,'◯','Color','green','fontsize',16); text(nx + 4, ny - 2,':healthy','fontsize',17);
+        text(nx + 2, ny - 4,'□','Color','blue','fontsize',16); text(nx + 4, ny - 4,':recover','fontsize',17);
         axis([0, nx + 1, 0, ny + 1]);
 
         axis('square');
@@ -190,3 +207,17 @@ for nt = 1 : nt_max
         n_fig = n_fig + 1;
     end
 end
+
+
+figure(1); clf;
+plot(immP_trans, '-b');
+hold on;
+plot(deadP_trans, '-k');
+hold on;
+plot(infP_trans, '-r');
+hold on;
+legend('recover', 'dead', 'infection')
+xlabel('t','fontsize', 20, 'fontname', 'times');
+ylabel('Number of people', 'fontsize', 20, 'fontname', 'times');
+ax = gca; set(ax, 'plotboxaspectratio', [1.5,1,1]);
+print res/statistics.jpg
