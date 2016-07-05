@@ -14,7 +14,7 @@ R = 0.385;      %治癒率
 D = 0.0004 * R; %死亡率
 F = 5;         %初期感染者数
 nt_max = 30;
-nt_interval = nt_max / 10;
+nt_interval = nt_max / 20;
 
 infP = zeros(nx, ny);
 infT = zeros(nx, ny);
@@ -80,7 +80,7 @@ axis('square');
 text(nx + 2, ny,'✳︎','Color','red','fontsize',20); text(nx + 4, ny,':infection','fontsize',17);
 text(nx + 2, ny - 2,'◯','Color','green','fontsize',16); text(nx + 4, ny - 2,':healthy','fontsize',17);
 text(nx + 2, ny - 4,'□','Color','blue','fontsize',16); text(nx + 4, ny - 4,':recover','fontsize',17);
-eval(sprintf('print res/pand_%d.jpg', n_fig));
+eval(sprintf('print res/pand_%d.jpg', n_fig - 1));
 n_fig = n_fig + 1;
 
 for nt = 1 : nt_max
@@ -202,8 +202,13 @@ for nt = 1 : nt_max
         axis([0, nx + 1, 0, ny + 1]);
 
         axis('square');
+        
+        if n_fig - 1 < 10
+            eval(sprintf('print res/pand_0%d.jpg', n_fig - 1));
+        else
+            eval(sprintf('print res/pand_%d.jpg', n_fig - 1));
+        end
 
-        eval(sprintf('print res/pand_%d.jpg', n_fig));
         n_fig = n_fig + 1;
     end
 end
