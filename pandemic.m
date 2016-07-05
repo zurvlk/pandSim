@@ -4,16 +4,16 @@ close all;
 %----------------------------------------------------------------
 % 各種パラメータ及び初期設定
 %----------------------------------------------------------------
-nx = 30;
-ny = 30;
+nx = 25;
+ny = 25;
 range = 1;
 N = nx * ny;
 
 I = 0.2;        %感染率
 R = 0.385;      %治癒率
 D = 0.0004 * R; %死亡率
-F = 5;         %初期感染者数
-nt_max = 30;
+F = 8;         %初期感染者数
+nt_max = 60;
 nt_interval = nt_max / 20;
 
 infP = zeros(nx, ny);
@@ -23,10 +23,12 @@ imm = zeros(nx, ny);
 dead = zeros(nx, ny);
 
 infP_trans = zeros(nt_max + 1, 1);
+hltP_trans = zeros(nt_max + 1, 1);
 deadP_trans = zeros(nt_max + 1, 1);
 immP_trans = zeros(nt_max + 1, 1);
 
 infP_trans(1, 1) = F;   %初期感染者数記録
+hltP_trans(1, 1) = N;
 
 for ii = 1 : F
     x = floor(nx * rand) + 1;
@@ -148,7 +150,6 @@ for nt = 1 : nt_max
                 if decision > 1 - R / 2
                     infP(ii, jj) = 0;
                     imm(ii, jj) = 1;
-                    immP_trans(nt + 1, 1) = immP_trans(nt + 1, 1) + 1;
                 else
                     if decision < D
                         dead(ii, jj) = 1;
@@ -166,7 +167,12 @@ for nt = 1 : nt_max
                 deadP_trans(nt + 1, 1) = deadP_trans(nt + 1, 1) + 1;
             end
 
+            if imm(ii, jj) == 1
+                immP_trans(nt + 1, 1) = immP_trans(nt + 1, 1) + 1;
+            end
+
         end
+        hltP_trans(nt + 1, 1) = N;
     end
 
 
@@ -202,12 +208,7 @@ for nt = 1 : nt_max
         axis([0, nx + 1, 0, ny + 1]);
 
         axis('square');
-        
-        if n_fig - 1 < 10
-            eval(sprintf('print res/pand_0%d.jpg', n_fig - 1));
-        else
-            eval(sprintf('print res/pand_%d.jpg', n_fig - 1));
-        end
+        eval(sprintf('print res/pand_%d.jpg', n_fig - 1));
 
         n_fig = n_fig + 1;
     end
@@ -215,13 +216,15 @@ end
 
 
 figure(1); clf;
+plot(hltP_trans, '-g');
+hold on;
 plot(immP_trans, '-b');
 hold on;
 plot(deadP_trans, '-k');
 hold on;
 plot(infP_trans, '-r');
 hold on;
-legend('recover', 'dead', 'infection')
+legend('all','recover', 'dead', 'infection')
 xlabel('t','fontsize', 20, 'fontname', 'times');
 ylabel('Number of people', 'fontsize', 20, 'fontname', 'times');
 ax = gca; set(ax, 'plotboxaspectratio', [1.5,1,1]);
