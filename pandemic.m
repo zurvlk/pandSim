@@ -79,9 +79,14 @@ end
 title('Infection status','fontsize',20);
 axis([0, nx + 1, 0, ny + 1]);
 axis('square');
+
+% windowsで実行する際は以下コメントアウト
+%-------------------------
 text(nx + 2, ny,'✳︎','Color','red','fontsize',20); text(nx + 4, ny,':infection','fontsize',17);
 text(nx + 2, ny - 2,'◯','Color','green','fontsize',16); text(nx + 4, ny - 2,':healthy','fontsize',17);
 text(nx + 2, ny - 4,'□','Color','blue','fontsize',16); text(nx + 4, ny - 4,':recover','fontsize',17);
+%-------------------------
+
 eval(sprintf('print res/pand_%d.jpg', n_fig - 1));
 n_fig = n_fig + 1;
 
@@ -202,9 +207,14 @@ for nt = 1 : nt_max
 
         title('Infection status','fontsize',20);
         text(nx + 2, ny - 10, [' t = ', num2str(nt)], 'fontsize', 20, 'fontname', 'times');
+
+        % windowsで実行する際は以下コメントアウト
+        %-------------------------
         text(nx + 2, ny,'✳︎','Color','red','fontsize',20); text(nx + 4, ny,':infection','fontsize',17);
         text(nx + 2, ny - 2,'◯','Color','green','fontsize',16); text(nx + 4, ny - 2,':healthy','fontsize',17);
         text(nx + 2, ny - 4,'□','Color','blue','fontsize',16); text(nx + 4, ny - 4,':recover','fontsize',17);
+        %-------------------------
+
         axis([0, nx + 1, 0, ny + 1]);
 
         axis('square');
